@@ -1,0 +1,324 @@
+You are a senior Flutter developer. Build me a Splitwise clone mobile app in Flutter.
+
+TECH STACK:
+- Frontend: Flutter (Dart)
+- Backend: Firebase (Firestore, Firebase Auth, Cloud Functions)
+- Auth: Firebase Authentication (email + password)
+- Deploy: Android APK + iOS build ready
+- State Management: Provider or Riverpod
+
+DESIGN: Match real Splitwise UI exactly — teal/green color scheme (#1CC29F), clean white cards, bottom navigation bar, material design components.
+
+---
+
+FIREBASE SETUP:
+- Firebase Auth for email/password login
+- Firestore as database (NoSQL)
+- Firebase Cloud Functions for balance calculation
+- google-services.json for Android
+- GoogleService-Info.plist for iOS
+- All config via FlutterFire CLI
+
+---
+
+FIRESTORE COLLECTIONS:
+
+users:
+  - id (Firebase Auth UID)
+  - name
+  - email
+  - avatarUrl
+  - createdAt
+
+groups:
+  - id
+  - name
+  - createdBy (user id)
+  - members (array of user ids)
+  - createdAt
+
+friendships:
+  - id
+  - user1Id
+  - user2Id
+  - createdAt
+
+expenses:
+  - id
+  - title
+  - amount (in paise - integer)
+  - paidBy (user id)
+  - groupId (null if direct between friends)
+  - category (Food/Transport/Rent/Entertainment/Others)
+  - date
+  - createdBy
+  - createdAt
+  - splits (array of { userId, amountOwed })
+
+settlements:
+  - id
+  - paidBy (user id)
+  - paidTo (user id)
+  - amount
+  - groupId (nullable)
+  - createdAt
+
+---
+
+FLUTTER PROJECT STRUCTURE:
+
+lib/
+  main.dart
+  firebase_options.dart
+  
+  models/
+    user_model.dart
+    group_model.dart
+    expense_model.dart
+    settlement_model.dart
+    friendship_model.dart
+    balance_model.dart
+
+  services/
+    auth_service.dart
+    firestore_service.dart
+    balance_service.dart
+
+  providers/
+    auth_provider.dart
+    group_provider.dart
+    expense_provider.dart
+    friend_provider.dart
+    balance_provider.dart
+
+  screens/
+    auth/
+      login_screen.dart
+      signup_screen.dart
+    home/
+      dashboard_screen.dart
+    groups/
+      groups_screen.dart
+      group_detail_screen.dart
+      create_group_screen.dart
+    expenses/
+      add_expense_screen.dart
+      expense_detail_screen.dart
+    friends/
+      friends_screen.dart
+      friend_detail_screen.dart
+      add_friend_screen.dart
+    settlements/
+      settle_up_screen.dart
+
+  widgets/
+    balance_card.dart
+    expense_tile.dart
+    friend_tile.dart
+    group_tile.dart
+    bottom_nav_bar.dart
+    loading_widget.dart
+    error_widget.dart
+
+  utils/
+    balance_calculator.dart
+    simplify_debts.dart
+    currency_formatter.dart
+    constants.dart
+
+---
+
+SCREENS TO BUILD:
+
+1. LOGIN SCREEN
+- Email + password fields
+- Login button
+- Navigate to Signup
+- Firebase Auth signInWithEmailAndPassword
+- Show error snackbar on failure
+
+2. SIGNUP SCREEN
+- Name, Email, Password fields
+- Create account button
+- Firebase Auth createUserWithEmailAndPassword
+- Save user to Firestore users collection
+
+3. DASHBOARD SCREEN (Home)
+- AppBar with user avatar
+- Total balance card (green if owed, red if you owe)
+- ListView of friends with individual balances
+- Recent activity list
+- BottomNavigationBar (Home, Groups, Friends, Account)
+
+4. GROUPS SCREEN
+- ListView of all groups user is in
+- Each GroupTile: group name, member count, your balance in group
+- FloatingActionButton to create new group
+
+5. CREATE GROUP SCREEN
+- TextField for group name
+- Add members by email
+- Save to Firestore
+
+6. GROUP DETAIL SCREEN
+- Group name in AppBar
+- Members avatars row
+- TabBar: Expenses | Balances
+- Expenses tab: ListView of all group expenses
+- Balances tab: Who owes whom (simplified)
+- FAB: Add Expense
+- Button: Settle Up
+
+7. ADD EXPENSE SCREEN
+- TextField: Title
+- TextField: Amount (number keyboard)
+- DatePicker: Date
+- DropdownButton: Category (Food/Transport/Rent/Entertainment/Others)
+- DropdownButton: Paid by (group members)
+- CheckboxListTile: Split between (select members)
+- Split equally only
+- Save to Firestore (expense + splits subcollection)
+
+8. SETTLE UP SCREEN
+- Dropdown: Select person
+- TextField: Amount
+- Save settlement to Firestore
+- Update balances
+
+9. FRIENDS SCREEN
+- ListView of all friends
+- Each tile: name, avatar, net balance (green/red)
+- FAB: Add friend by email
+
+10. FRIEND DETAIL SCREEN
+- Friend name in AppBar
+- Net balance card
+- ListView of shared expenses
+- Settle Up button
+
+---
+
+MODELS (Dart classes):
+
+UserModel:
+  String id, name, email, avatarUrl
+  DateTime createdAt
+  factory fromFirestore()
+  toMap()
+
+ExpenseModel:
+  String id, title, paidBy, groupId, category
+  int amount (paise)
+  List<SplitModel> splits
+  DateTime date, createdAt
+  factory fromFirestore()
+  toMap()
+
+SplitModel:
+  String userId
+  int amountOwed
+
+SettlementModel:
+  String id, paidBy, paidTo
+  int amount
+  String? groupId
+  DateTime createdAt
+
+BalanceModel:
+  String userId
+  String userName
+  int netAmount (positive = they owe you, negative = you owe them)
+
+---
+
+SERVICES:
+
+auth_service.dart:
+  signUp(name, email, password)
+  signIn(email, password)
+  signOut()
+  getCurrentUser()
+
+firestore_service.dart:
+  createGroup(name, memberIds)
+  addExpense(expense)
+  addSettlement(settlement)
+  addFriendByEmail(email)
+  streamGroupExpenses(groupId)
+  streamFriends(userId)
+  streamGroups(userId)
+
+balance_service.dart:
+  calculateFriendBalance(userId, friendId)
+  calculateGroupBalances(groupId)
+  simplifyDebts(List<BalanceModel>)
+  getOverallBalance(userId)
+
+---
+
+BALANCE CALCULATION LOGIC:
+- For each expense: payer is owed amountOwed by each split member
+- Net balance per pair = total owed to you - total you owe them
+- Simplify debts: greedy algorithm (sort creditors and debtors, match largest first)
+- All amounts in paise (integer), display as ₹X.XX using currency_formatter.dart
+
+---
+
+UTILS:
+
+currency_formatter.dart:
+  formatAmount(int paise) → "₹10.50"
+  
+constants.dart:
+  const primaryColor = Color(0xFF1CC29F)
+  const categories = [Food, Transport, Rent, Entertainment, Others]
+
+---
+
+FIRESTORE SECURITY RULES:
+- Users read/write own document only
+- Groups readable by members only
+- Expenses readable by group members or involved users
+- Settlements readable by paidBy or paidTo only
+
+---
+
+PUBSPEC DEPENDENCIES:
+  firebase_core: latest
+  firebase_auth: latest
+  cloud_firestore: latest
+  provider: latest (or riverpod)
+  intl: latest
+  uuid: latest
+  cached_network_image: latest
+  flutter_svg: latest
+
+---
+
+IMPORTANT RULES:
+- Use StreamBuilder for real-time Firestore data
+- All Firestore writes use batch where multiple docs updated together
+- Show CircularProgressIndicator during async operations
+- SnackBar for all success/error messages
+- All amounts stored as int (paise), never double
+- Null safety throughout (Dart null safety)
+- Separate business logic from UI completely
+
+---
+
+BUILD ORDER:
+1. Flutter project setup + Firebase connection (FlutterFire CLI)
+2. All model classes
+3. Auth service + Login/Signup screens
+4. Firestore service
+5. Balance calculator utility
+6. Provider/Riverpod setup
+7. Dashboard screen
+8. Groups screens
+9. Add Expense screen
+10. Friends screens
+11. Settle Up screen
+12. Firestore Security Rules
+13. Build APK for Android
+
+Start building now. Show me the full code file by file.
