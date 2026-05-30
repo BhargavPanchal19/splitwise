@@ -27,6 +27,12 @@
           "origin": "https://replit.com/"
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan friend QR codes."
+        }
+      ],
       "expo-font",
       "expo-web-browser"
     ],

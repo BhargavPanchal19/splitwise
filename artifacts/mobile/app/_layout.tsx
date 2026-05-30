@@ -12,10 +12,25 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Text, TextInput } from "react-native";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/context/AuthContext";
 import { DataProvider } from "@/context/DataContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+
+// Force global default typography to Inter across the entire React Native environment
+if ((Text as any).defaultProps) {
+  (Text as any).defaultProps.style = { fontFamily: "Inter_400Regular", ...((Text as any).defaultProps.style || {}) };
+} else {
+  (Text as any).defaultProps = { style: { fontFamily: "Inter_400Regular" } };
+}
+
+if ((TextInput as any).defaultProps) {
+  (TextInput as any).defaultProps.style = { fontFamily: "Inter_400Regular", ...((TextInput as any).defaultProps.style || {}) };
+} else {
+  (TextInput as any).defaultProps = { style: { fontFamily: "Inter_400Regular" } };
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,15 +43,6 @@ function RootLayoutNav() {
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
-        name="groups/[id]"
-        options={{
-          title: "Group",
-          headerStyle: { backgroundColor: "#FFFFFF" },
-          headerTitleStyle: { fontFamily: "Inter_700Bold", fontSize: 18 },
-          headerShadowVisible: false,
-        }}
-      />
-      <Stack.Screen
         name="friends/[id]"
         options={{
           title: "Friend",
@@ -46,12 +52,17 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen
+        name="friends/scan"
+        options={{
+          headerShown: false,
+          presentation: "fullScreenModal",
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
         name="expenses/add"
         options={{
-          title: "Add Expense",
-          headerStyle: { backgroundColor: "#FFFFFF" },
-          headerTitleStyle: { fontFamily: "Inter_700Bold", fontSize: 18 },
-          headerShadowVisible: false,
+          headerShown: false,
           presentation: "modal",
         }}
       />
@@ -79,15 +90,17 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <DataProvider>
-              <GestureHandlerRootView>
-                <KeyboardProvider>
-                  <RootLayoutNav />
-                </KeyboardProvider>
-              </GestureHandlerRootView>
-            </DataProvider>
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <DataProvider>
+                <GestureHandlerRootView>
+                  <KeyboardProvider>
+                    <RootLayoutNav />
+                  </KeyboardProvider>
+                </GestureHandlerRootView>
+              </DataProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>

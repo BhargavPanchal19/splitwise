@@ -39,12 +39,33 @@ export default function ExpenseTile({
   const icon =
     CATEGORY_ICONS[expense.category] ?? "ellipsis-horizontal-circle-outline";
 
+  let monthStr = "May";
+  let dayStr = "29";
+  try {
+    const dateObj = new Date(expense.date);
+    if (!isNaN(dateObj.getTime())) {
+      monthStr = dateObj.toLocaleString("en-US", { month: "short" });
+      dayStr = dateObj.getDate().toString();
+    }
+  } catch (e) {
+    console.warn("Invalid date in ExpenseTile:", e);
+  }
+
   return (
     <TouchableOpacity
       style={[styles.container, { backgroundColor: colors.card }]}
       onPress={onPress}
       activeOpacity={0.7}
     >
+      <View style={styles.dateContainer}>
+        <Text style={[styles.dateMonth, { color: colors.mutedForeground }]}>
+          {monthStr}
+        </Text>
+        <Text style={[styles.dateDay, { color: colors.foreground }]}>
+          {dayStr}
+        </Text>
+      </View>
+
       <View
         style={[styles.iconContainer, { backgroundColor: colors.secondary }]}
       >
@@ -87,6 +108,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
+  },
+  dateContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 36,
+    marginRight: 2,
+  },
+  dateMonth: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  dateDay: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 17,
+    marginTop: 1,
   },
   iconContainer: {
     width: 44,

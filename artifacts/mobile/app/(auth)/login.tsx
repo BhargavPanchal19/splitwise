@@ -34,7 +34,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signIn(email, password);
-      router.replace("/(tabs)/");
+      router.replace("/(tabs)/friends");
     } catch (e: any) {
       Alert.alert("Login Failed", e.message);
     } finally {
@@ -131,6 +131,8 @@ export default function LoginScreen() {
               </Text>
             </Text>
           </TouchableOpacity>
+
+
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -215,5 +217,19 @@ const styles = StyleSheet.create({
   linkText: {
     fontFamily: "Inter_400Regular",
     fontSize: 15,
+  },
+  demoCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  demoText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
   },
 });

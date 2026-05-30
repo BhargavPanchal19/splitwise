@@ -1,11 +1,12 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import { useColors } from "@/hooks/useColors";
 
 interface AvatarProps {
   name: string;
   size?: number;
   color?: string;
+  photoURL?: string;
 }
 
 const AVATAR_COLORS = [
@@ -29,7 +30,7 @@ function getColor(name: string): string {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-export default function Avatar({ name, size = 40, color }: AvatarProps) {
+export default function Avatar({ name, size = 40, color, photoURL }: AvatarProps) {
   const colors = useColors();
   const initials = name
     .split(" ")
@@ -38,6 +39,15 @@ export default function Avatar({ name, size = 40, color }: AvatarProps) {
     .join("");
   const bg = color ?? getColor(name);
   const fontSize = size * 0.38;
+
+  if (photoURL) {
+    return (
+      <Image
+        source={{ uri: photoURL }}
+        style={{ width: size, height: size, borderRadius: size / 2 }}
+      />
+    );
+  }
 
   return (
     <View

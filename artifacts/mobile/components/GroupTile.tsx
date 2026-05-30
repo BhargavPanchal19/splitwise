@@ -15,17 +15,6 @@ export default function GroupTile({ group, balance, onPress }: GroupTileProps) {
   const colors = useColors();
   const isPositive = balance > 0;
   const isZero = balance === 0;
-  const balanceColor = isZero
-    ? colors.mutedForeground
-    : isPositive
-    ? colors.positive
-    : colors.negative;
-
-  const balanceText = isZero
-    ? "settled up"
-    : isPositive
-    ? `you are owed ${formatAmount(balance)}`
-    : `you owe ${formatAmount(Math.abs(balance))}`;
 
   return (
     <TouchableOpacity
@@ -47,9 +36,25 @@ export default function GroupTile({ group, balance, onPress }: GroupTileProps) {
         </Text>
       </View>
       <View style={styles.right}>
-        <Text style={[styles.balance, { color: balanceColor }]}>
-          {balanceText}
-        </Text>
+        {isZero ? (
+          <Text style={[styles.statusLabel, { color: colors.mutedForeground }]}>
+            settled up
+          </Text>
+        ) : (
+          <>
+            <Text style={[styles.statusLabel, { color: colors.mutedForeground }]}>
+              {isPositive ? "you are owed" : "you owe"}
+            </Text>
+            <Text
+              style={[
+                styles.amount,
+                { color: isPositive ? colors.positive : colors.negative },
+              ]}
+            >
+              {formatAmount(Math.abs(balance))}
+            </Text>
+          </>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -89,12 +94,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   right: {
-    maxWidth: 140,
     alignItems: "flex-end",
+    gap: 2,
   },
-  balance: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 13,
-    textAlign: "right",
+  statusLabel: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    textTransform: "lowercase",
+  },
+  amount: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 15,
   },
 });

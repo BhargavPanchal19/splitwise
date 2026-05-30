@@ -1,14 +1,21 @@
 export function formatAmount(amount: number): string {
   const abs = Math.abs(amount);
   const formatted = (abs / 100).toFixed(2);
-  return `$${formatted}`;
+  const parts = formatted.split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return `₹${parts.join(".")}`;
 }
 
 export function formatAmountSigned(amount: number): string {
-  const formatted = (Math.abs(amount) / 100).toFixed(2);
-  if (amount > 0) return `+$${formatted}`;
-  if (amount < 0) return `-$${formatted}`;
-  return `$${formatted}`;
+  const abs = Math.abs(amount);
+  const formatted = (abs / 100).toFixed(2);
+  const parts = formatted.split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const valueStr = `₹${parts.join(".")}`;
+  
+  if (amount > 0) return `+${valueStr}`;
+  if (amount < 0) return `-${valueStr}`;
+  return valueStr;
 }
 
 export function parseToCents(value: string): number {
