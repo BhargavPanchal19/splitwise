@@ -516,6 +516,38 @@ function updateManifests(manifests, timestamp, baseUrl, assetsByHash) {
   console.log("Manifests updated");
 }
 
+function getAppName() {
+  try {
+    const appJsonPath = path.resolve(__dirname, "..", "app.json");
+    const appJson = JSON.parse(fs.readFileSync(appJsonPath, "utf-8"));
+    return appJson.expo?.name || "App Landing Page";
+  } catch {
+    return "App Landing Page";
+  }
+}
+
+function createLandingPage(baseUrl, appName) {
+  const templatePath = path.resolve(__dirname, "..", "server", "templates", "landing-page.html");
+  if (!fs.existsSync(templatePath)) {
+    console.warn("Landing page template not found, skipping static landing page creation.");
+    return;
+  }
+
+  const landingPageTemplate = fs.readFileSync(templatePath, "utf-8");
+  const expsUrl = baseUrl.replace(/^https?:\/\//i, "");
+
+  const html = landingPageTemplate
+    .replace(/BASE_URL_PLACEHOLDER/g, baseUrl)
+    .replace(/EXPS_URL_PLACEHOLDER/g, expsUrl)
+    .replace(/APP_NAME_PLACEHOLDER/g, appName);
+
+  fs.writeFileSync(
+    path.join(projectRoot, "static-build", "index.html"),
+    html
+  );
+  console.log("Static landing page index.html created");
+}
+
 async function main() {
   console.log("Building static Expo Go deployment...");
 
@@ -566,6 +598,9 @@ async function main() {
 
   console.log("Updating manifests and creating landing page...");
   updateManifests(manifests, timestamp, baseUrl, assetsByHash);
+
+  const appName = getAppName();
+  createLandingPage(baseUrl, appName);
 
   console.log("Build complete! Deploy to:", baseUrl);
 

@@ -1,0 +1,50 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "expo-platform",
+          "value": "ios"
+        }
+      ],
+      "destination": "/ios/manifest.json"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "expo-platform",
+          "value": "android"
+        }
+      ],
+      "destination": "/android/manifest.json"
+    },
+    {
+      "source": "/manifest",
+      "has": [
+        {
+          "type": "header",
+          "key": "expo-platform",
+          "value": "ios"
+        }
+      ],
+      "destination": "/ios/manifest.json"
+    },
+    {
+      "source": "/manifest",
+      "has": [
+        {
+          "type": "header",
+          "key": "expo-platform",
+          "value": "android"
+        }
+      ],
+      "destination": "/android/manifest.json"
+    }
+  ]
+}
