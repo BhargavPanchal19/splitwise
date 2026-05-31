@@ -67,8 +67,19 @@ function getDeploymentDomain() {
     return stripProtocol(process.env.EXPO_PUBLIC_DOMAIN);
   }
 
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return stripProtocol(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+  }
+
+  if (process.env.VERCEL_URL) {
+    return stripProtocol(process.env.VERCEL_URL);
+  }
+
   console.error(
-    "ERROR: No deployment domain found. Set REPLIT_INTERNAL_APP_DOMAIN, REPLIT_DEV_DOMAIN, or EXPO_PUBLIC_DOMAIN",
+    "ERROR: No deployment domain found. Please set one of the following environment variables:\n" +
+    "  - EXPO_PUBLIC_DOMAIN (e.g., your-domain.vercel.app)\n" +
+    "  - VERCEL_URL (automatically set by Vercel)\n" +
+    "  - REPLIT_DEV_DOMAIN / REPLIT_INTERNAL_APP_DOMAIN (automatically set by Replit)"
   );
   process.exit(1);
 }
