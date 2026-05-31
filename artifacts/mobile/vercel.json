@@ -2,8 +2,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "outputDirectory": "dist",
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }
